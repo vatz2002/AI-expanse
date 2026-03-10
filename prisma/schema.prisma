@@ -1,0 +1,249 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  expenses         Expense[]
+  budgets          Budget[]
+  aiInsights       AIInsight[]
+  groupMemberships GroupMember[]
+  groupMessages    GroupMessage[]
+  createdGroups    Group[]        @relation("GroupCreator")
+  gmailConnection  GmailConnection?
+
+  @@index([clerkId])
+  @@index([email])
+}
+
+enum ExpenseCategory {
+  FOOD_DINING
+  GROCERIES
+  TRAVEL_FUEL
+  RENT
+  ELECTRICITY_GAS
+  MOBILE_INTERNET
+  SHOPPING
+  SUBSCRIPTIONS
+  MEDICAL
+  EDUCATION
+  MISCELLANEOUS
+}
+
+model Expense {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  amount      Decimal         @db.Decimal(12, 2)
+  currency    String          @default("INR")
+  category    ExpenseCategory
+  description String
+  date        DateTime
+
+  // Receipt handling
+  receiptUrl  String?
+  receiptText String? @db.Text
+
+  // AI categorization
+  aiCategorized Boolean @default(false)
+  aiConfidence  Float?
+  aiReasoning   String? @db.Text
+
+  // Auto-sync from group expenses (null = personal expense, set = synced from group)
+  groupExpenseId String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([date])
+  @@index([category])
+  @@index([userId, date])
+}
+
+model Budget {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  category ExpenseCategory
+  amount   Decimal         @db.Decimal(12, 2)
+  currency String          @default("INR")
+  month    Int // 1-12
+  year     Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, category, month, year])
+  @@index([userId])
+  @@index([month, year])
+}
+
+model AIInsight {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  insight  String           @db.Text
+  type     String // "spending_pattern", "budget_warning", "savings_tip"
+  category ExpenseCategory?
+  amount   Decimal?         @db.Decimal(12, 2)
+  month    Int
+  year     Int
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([month, year])
+}
+
+model Group {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  createdBy   String
+  creator     User    @relation("GroupCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  inviteCode  String? @unique @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members     GroupMember[]
+  expenses    GroupExpense[]
+  messages    GroupMessage[]
+  settlements Settlement[]
+
+  @@index([createdBy])
+  @@index([inviteCode])
+}
+
+model GroupMember {
+  id      String @id @default(cuid())
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role    String @default("member") // "admin" or "member"
+  status  String @default("active") // "pending" or "active"
+
+  joinedAt DateTime @default(now())
+
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+}
+
+model GroupExpense {
+  id      String @id @default(cuid())
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  amount      Decimal         @db.Decimal(12, 2)
+  currency    String          @default("INR")
+  category    ExpenseCategory
+  description String
+  date        DateTime
+  paidBy      String // userId who paid
+
+  splitType String @default("equal") // "equal" or "custom"
+
+  splits GroupExpenseSplit[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([groupId])
+  @@index([date])
+}
+
+model GroupExpenseSplit {
+  id        String @id @default(cuid())
+  expenseId String
+  expense   GroupExpense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  userId    String
+  amount    Decimal @db.Decimal(12, 2)
+
+  createdAt DateTime @default(now())
+
+  @@unique([expenseId, userId])
+  @@index([expenseId])
+  @@index([userId])
+}
+
+model GroupMessage {
+  id      String @id @default(cuid())
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  message String @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([groupId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model MonthlyBudget {
+  id       String  @id @default(cuid())
+  userId   String
+  amount   Decimal @db.Decimal(12, 2)
+  currency String  @default("INR")
+  month    Int // 1-12
+  year     Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, month, year])
+  @@index([userId])
+  @@index([month, year])
+}
+
+model Settlement {
+  id      String @id @default(cuid())
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  fromUserId String // who is paying the debt
+  toUserId   String // who is being paid
+  amount     Decimal @db.Decimal(12, 2)
+  note       String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([groupId])
+  @@index([fromUserId])
+  @@index([toUserId])
+}
+
+model GmailConnection {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email        String
+  accessToken  String   @db.Text
+  refreshToken String?  @db.Text
+  expiryDate   BigInt?
+  
+  lastSyncedAt DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+}
