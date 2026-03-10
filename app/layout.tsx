@@ -9,9 +9,20 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'ExpenseAI — Smart AI-Powered Expense Tracking for India',
   description: 'Track your expenses in INR with AI-powered categorization. Built for Indian users with smart budgets, group splitting, and beautiful analytics.',
-  keywords: 'expense tracker, india, INR, money management, budget, AI, finance',
+  keywords: 'expense tracker, india, INR, money management, budget, AI, finance, pwa',
+  manifest: '/manifest.json',
+  themeColor: '#06070e',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'ExpenseAI',
+  },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
     icon: '/icon.svg',
+    apple: '/icon.svg',
   },
 };
 

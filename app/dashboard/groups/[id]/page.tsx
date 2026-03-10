@@ -231,8 +231,50 @@ export default function GroupDetailPage({ params }: { params: { id: string } }) 
   };
 
   const getInviteLink = () => group?.inviteCode ? `${window.location.origin}/dashboard/groups/join?code=${group.inviteCode}` : '';
-  const copyInviteLink = () => { const link = getInviteLink(); if (!link) return; navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 2000); };
-  const shareNative = async () => { const link = getInviteLink(); if (!link) return; if (navigator.share) { try { await navigator.share({ title: `Join ${group?.name}`, url: link }); } catch { } } else { copyInviteLink(); } };
+  const copyInviteLink = () => {
+    const link = getInviteLink();
+    if (!link) return;
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(link);
+    } else {
+      // Fallback for non-HTTPS (like local IP testing on mobile)
+      const textArea = document.createElement('textarea');
+      textArea.value = link;
+      textArea.style.position = 'absolute';
+      textArea.style.left = '-999999px';
+      document.body.prepend(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+      } catch (error) {
+        console.error('Fallback copy failed', error);
+      } finally {
+        textArea.remove();
+      }
+    }
+
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  const shareNative = async () => {
+    const link = getInviteLink();
+    if (!link) return;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `Join ${group?.name}`, url: link });
+      } catch (err) {
+        // If user actively cancels the share dialog, do not copy automatically as it's unexpected
+        // Only fallback if the error is not an abort error
+        if (err instanceof Error && err.name !== 'AbortError') {
+          copyInviteLink();
+        }
+      }
+    } else {
+      copyInviteLink();
+    }
+  };
   const shareViaWhatsApp = () => { const link = getInviteLink(); if (!link) return; window.open(`https://wa.me/?text=${encodeURIComponent(`Join "${group?.name}": ${link}`)}`, '_blank'); };
   const shareViaTelegram = () => { const link = getInviteLink(); if (!link) return; window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(`Join "${group?.name}"`)}`, '_blank'); };
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

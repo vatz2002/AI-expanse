@@ -80,6 +80,21 @@ export async function POST(
             },
         });
 
+        // Also create a personal expense for the user paying the settlement
+        const group = await prisma.group.findUnique({ where: { id: params.id } });
+
+        await prisma.expense.create({
+            data: {
+                userId: data.fromUserId,
+                amount: data.amount,
+                currency: 'INR',
+                category: 'MISCELLANEOUS',
+                description: `Settlement: ${group?.name || 'Group'} expense`,
+                date: new Date(),
+                settlementId: settlement.id,
+            },
+        });
+
         return NextResponse.json(settlement, { status: 201 });
     } catch (error) {
         if (error instanceof z.ZodError) {

@@ -168,11 +168,30 @@ export default function GroupsPage() {
   };
 
   const copyInvite = (code: string, groupId: string) => {
-    navigator.clipboard.writeText(code).then(() => {
+    const onSuccess = () => {
       setCopiedId(groupId);
       toast.success('Invite code copied!');
       setTimeout(() => setCopiedId(null), 2000);
-    });
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(code).then(onSuccess).catch(() => toast.error('Failed to copy'));
+    } else {
+      const textArea = document.createElement('textarea');
+      textArea.value = code;
+      textArea.style.position = 'absolute';
+      textArea.style.left = '-999999px';
+      document.body.prepend(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        onSuccess();
+      } catch (error) {
+        toast.error('Failed to copy');
+      } finally {
+        textArea.remove();
+      }
+    }
   };
 
   const totalGroups = groups.length;

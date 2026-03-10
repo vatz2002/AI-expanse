@@ -64,6 +64,9 @@ model Expense {
   // Auto-sync from group expenses (null = personal expense, set = synced from group)
   groupExpenseId String? @unique
 
+  // Auto-sync from group settlements (null = personal expense, set = generated from settling a debt)
+  settlementId String? @unique
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
