@@ -763,234 +763,240 @@ export default function DashboardPage() {
           </motion.div>
         </div>
 
-        {/* ═══════════════ Settle Up Overview ═══════════════ */}
-        {settlements.length > 0 && (
-          <motion.div custom={8} variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
-            <div className="glass-card rounded-2xl">
-              <div className="px-5 pt-5 pb-2">
+        {/* ═══════════════ Actions & Settlements Grid ═══════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          {/* ═══════════════ Settle Up Overview ═══════════════ */}
+          {settlements.length > 0 && (
+            <motion.div custom={8} variants={fadeUp} initial="hidden" animate="visible" className="h-full">
+              <div className="glass-card rounded-2xl h-full flex flex-col">
+                <div className="px-5 pt-5 pb-2 shrink-0">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-display font-semibold text-white flex items-center gap-2">
+                        <ArrowRightLeft className="h-4 w-4 text-amber-400" />
+                        Settle Up
+                      </h3>
+                      <p className="text-xs text-gray-500">Pending settlements across your groups</p>
+                    </div>
+                    <Link href="/dashboard/groups">
+                      <Button variant="ghost" size="sm" className="text-xs text-gray-500 hover:text-gray-300 rounded-lg">
+                        All Groups <ChevronRight className="ml-1 h-3 w-3" />
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+                <div className="px-5 pb-5 space-y-2 flex-1 overflow-y-auto max-h-[300px] custom-scrollbar">
+                  {settlements.slice(0, 5).map((s: any, idx: number) => (
+                    <motion.div
+                      key={s.id}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.6 + idx * 0.05 }}
+                      className={`flex items-center justify-between p-3.5 rounded-xl border transition-all ${s.youOwe
+                        ? 'bg-rose-500/[0.04] border-rose-500/10 hover:border-rose-500/20'
+                        : 'bg-emerald-500/[0.04] border-emerald-500/10 hover:border-emerald-500/20'
+                        }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${s.youOwe ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                          {s.youOwe ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-300">
+                            {s.youOwe ? (
+                              <>You owe <span className="font-medium text-white">{s.toUserName}</span></>
+                            ) : (
+                              <><span className="font-medium text-white">{s.fromUserName}</span> owes you</>
+                            )}
+                          </p>
+                          <p className="text-[10px] text-gray-600 mt-0.5">{s.groupName}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <p className={`text-base font-bold tabular-nums ${s.youOwe ? 'text-rose-400' : 'text-emerald-400'}`}>
+                          {s.youOwe ? '-' : '+'}{formatIndianCurrency(s.amount)}
+                        </p>
+                        <Link href={`/dashboard/groups/${s.groupId}`}>
+                          <button className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-gray-400 hover:text-white transition-all">
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          </button>
+                        </Link>
+                      </div>
+                    </motion.div>
+                  ))}
+                  {settlements.length > 5 && (
+                    <p className="text-center text-xs text-gray-600 pt-1">+ {settlements.length - 5} more settlements</p>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ═══════════════ Quick Add Personal Expense ═══════════════ */}
+          <motion.div custom={9} variants={fadeUp} initial="hidden" animate="visible" className={settlements.length > 0 ? 'h-full' : 'lg:col-span-2'}>
+            <div className="glass-card rounded-2xl h-full flex flex-col justify-center">
+              <div className="px-5 pt-5 pb-3">
+                <h3 className="text-base font-display font-semibold text-white flex items-center gap-2">
+                  <Plus className="h-4 w-4 text-violet-400" />
+                  Quick Add Expense
+                </h3>
+                <p className="text-xs text-gray-500">Add a personal expense without leaving the dashboard</p>
+              </div>
+              <div className="px-5 pb-5">
+                <form onSubmit={handleQuickExpense} className="space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="What did you spend on?"
+                      value={quickExpense.description}
+                      onChange={e => setQuickExpense(prev => ({ ...prev, description: e.target.value }))}
+                      className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-2.5 text-sm text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/30 transition-colors"
+                    />
+                    <div className="relative">
+                      <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500" />
+                      <input
+                        type="number"
+                        placeholder="Amount"
+                        value={quickExpense.amount}
+                        onChange={e => setQuickExpense(prev => ({ ...prev, amount: e.target.value }))}
+                        className="w-28 bg-white/[0.03] border border-white/[0.06] rounded-xl pl-8 pr-3 py-2.5 text-sm text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/30 transition-colors"
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+                      {['FOOD_DINING', 'GROCERIES', 'TRAVEL_FUEL', 'SHOPPING', 'MISCELLANEOUS'].map(cat => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setQuickExpense(prev => ({ ...prev, category: cat }))}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all flex items-center gap-1 ${quickExpense.category === cat
+                            ? 'gradient-primary text-white shadow-md shadow-indigo-500/15'
+                            : 'bg-white/[0.03] text-gray-500 hover:text-gray-300 border border-white/[0.06]'
+                            }`}
+                        >
+                          {getCategoryIcon(cat as any)} {getCategoryLabel(cat as any)}
+                        </button>
+                      ))}
+                    </div>
+                    <Button
+                      type="submit"
+                      disabled={quickLoading || !quickExpense.description.trim() || !quickExpense.amount}
+                      className={`rounded-xl px-5 ml-3 transition-all ${quickSuccess
+                        ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                        : 'gradient-primary text-white shadow-lg shadow-violet-500/20'
+                        }`}
+                    >
+                      {quickLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : quickSuccess ? '✓ Added!' : <><Send className="mr-1.5 h-3.5 w-3.5" /> Add</>}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* ═══════════════ Activity & Expenses Grid ═══════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          {/* ═══════════════ Activity Feed ═══════════════ */}
+          <motion.div custom={10} variants={fadeUp} initial="hidden" animate="visible" className="h-full">
+            <div className="glass-card rounded-2xl h-full flex flex-col">
+              <div className="px-5 pt-5 pb-2 shrink-0">
+                <h3 className="text-base font-display font-semibold text-white flex items-center gap-2">
+                  <Receipt className="h-4 w-4 text-indigo-400" />
+                  Activity Feed
+                </h3>
+                <p className="text-xs text-gray-500">Recent actions across your groups</p>
+              </div>
+              <div className="px-3 pb-5 flex-1 overflow-y-auto max-h-[360px] custom-scrollbar">
+                <ActivityFeed />
+              </div>
+            </div>
+          </motion.div>
+
+          {/* ═══════════════ Recent Expenses ═══════════════ */}
+          <motion.div custom={11} variants={fadeUp} initial="hidden" animate="visible" className="h-full">
+            <div className="glass-card rounded-2xl h-full flex flex-col">
+              <div className="px-5 pt-5 pb-2 shrink-0">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-base font-display font-semibold text-white flex items-center gap-2">
-                      <ArrowRightLeft className="h-4 w-4 text-amber-400" />
-                      Settle Up
+                      <Receipt className="h-4 w-4 text-sky-400" />
+                      Recent Expenses
                     </h3>
-                    <p className="text-xs text-gray-500">Pending settlements across your groups</p>
+                    <p className="text-xs text-gray-500">Your latest transactions</p>
                   </div>
-                  <Link href="/dashboard/groups">
+                  <Link href="/dashboard/expenses">
                     <Button variant="ghost" size="sm" className="text-xs text-gray-500 hover:text-gray-300 rounded-lg">
-                      All Groups <ChevronRight className="ml-1 h-3 w-3" />
+                      View All <ChevronRight className="ml-1 h-3 w-3" />
                     </Button>
                   </Link>
                 </div>
               </div>
-              <div className="px-5 pb-5 space-y-2">
-                {settlements.slice(0, 5).map((s: any, idx: number) => (
-                  <motion.div
-                    key={s.id}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.6 + idx * 0.05 }}
-                    className={`flex items-center justify-between p-3.5 rounded-xl border transition-all ${s.youOwe
-                      ? 'bg-rose-500/[0.04] border-rose-500/10 hover:border-rose-500/20'
-                      : 'bg-emerald-500/[0.04] border-emerald-500/10 hover:border-emerald-500/20'
-                      }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${s.youOwe ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
-                        {s.youOwe ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-300">
-                          {s.youOwe ? (
-                            <>You owe <span className="font-medium text-white">{s.toUserName}</span></>
-                          ) : (
-                            <><span className="font-medium text-white">{s.fromUserName}</span> owes you</>
+              <div className="px-5 pb-5 flex-1 overflow-y-auto max-h-[360px] custom-scrollbar">
+                {stats?.recentExpenses && stats.recentExpenses.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {stats.recentExpenses.slice(0, 6).map((expense, idx) => (
+                      <motion.div
+                        key={expense.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.8 + idx * 0.05 }}
+                        className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] border border-transparent hover:border-white/[0.06] transition-all group"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div
+                            className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0 transition-transform group-hover:scale-105"
+                            style={{ backgroundColor: `${getCategoryColor(expense.category)}12` }}
+                          >
+                            {getCategoryIcon(expense.category)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-gray-200 truncate">{expense.description}</p>
+                            <p className="text-xs text-gray-600">
+                              {getCategoryLabel(expense.category)} &middot; {formatIndianDate(expense.date)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end shrink-0 ml-3">
+                          <div className="flex items-center gap-3">
+                            <p className="text-sm font-bold text-gray-100 dark:text-gray-100">
+                              {formatIndianCurrency(parseFloat(expense.amount))}
+                            </p>
+                            <Link href={`/dashboard/expenses/${expense.id}/edit`}>
+                              <button
+                                title="Edit Expense"
+                                className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 hover:text-indigo-300 transition-colors opacity-0 group-hover:opacity-100"
+                              >
+                                <Edit className="h-3.5 w-3.5" />
+                              </button>
+                            </Link>
+                          </div>
+                          {expense.aiCategorized && (
+                            <p className="text-[10px] text-violet-400 flex items-center gap-0.5 mt-1">
+                              <Sparkles className="h-2.5 w-2.5" /> AI
+                            </p>
                           )}
-                        </p>
-                        <p className="text-[10px] text-gray-600 mt-0.5">{s.groupName}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <p className={`text-base font-bold tabular-nums ${s.youOwe ? 'text-rose-400' : 'text-emerald-400'}`}>
-                        {s.youOwe ? '-' : '+'}{formatIndianCurrency(s.amount)}
-                      </p>
-                      <Link href={`/dashboard/groups/${s.groupId}`}>
-                        <button className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-gray-400 hover:text-white transition-all">
-                          <ChevronRight className="h-3.5 w-3.5" />
-                        </button>
-                      </Link>
-                    </div>
-                  </motion.div>
-                ))}
-                {settlements.length > 5 && (
-                  <p className="text-center text-xs text-gray-600 pt-1">+ {settlements.length - 5} more settlements</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-gray-600">
+                    <p className="text-sm">No expenses yet</p>
+                    <Link href="/dashboard/expenses/new">
+                      <Button className="mt-3 rounded-xl" size="sm">
+                        Add Your First Expense
+                      </Button>
+                    </Link>
+                  </div>
                 )}
               </div>
             </div>
           </motion.div>
-        )}
-
-        {/* ═══════════════ Quick Add Personal Expense ═══════════════ */}
-        <motion.div custom={9} variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
-          <div className="glass-card rounded-2xl">
-            <div className="px-5 pt-5 pb-3">
-              <h3 className="text-base font-display font-semibold text-white flex items-center gap-2">
-                <Plus className="h-4 w-4 text-violet-400" />
-                Quick Add Expense
-              </h3>
-              <p className="text-xs text-gray-500">Add a personal expense without leaving the dashboard</p>
-            </div>
-            <div className="px-5 pb-5">
-              <form onSubmit={handleQuickExpense} className="space-y-3">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="What did you spend on?"
-                    value={quickExpense.description}
-                    onChange={e => setQuickExpense(prev => ({ ...prev, description: e.target.value }))}
-                    className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-2.5 text-sm text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/30 transition-colors"
-                  />
-                  <div className="relative">
-                    <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500" />
-                    <input
-                      type="number"
-                      placeholder="Amount"
-                      value={quickExpense.amount}
-                      onChange={e => setQuickExpense(prev => ({ ...prev, amount: e.target.value }))}
-                      className="w-28 bg-white/[0.03] border border-white/[0.06] rounded-xl pl-8 pr-3 py-2.5 text-sm text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/30 transition-colors"
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-                    {['FOOD_DINING', 'GROCERIES', 'TRAVEL_FUEL', 'SHOPPING', 'MISCELLANEOUS'].map(cat => (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => setQuickExpense(prev => ({ ...prev, category: cat }))}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all flex items-center gap-1 ${quickExpense.category === cat
-                          ? 'gradient-primary text-white shadow-md shadow-indigo-500/15'
-                          : 'bg-white/[0.03] text-gray-500 hover:text-gray-300 border border-white/[0.06]'
-                          }`}
-                      >
-                        {getCategoryIcon(cat as any)} {getCategoryLabel(cat as any)}
-                      </button>
-                    ))}
-                  </div>
-                  <Button
-                    type="submit"
-                    disabled={quickLoading || !quickExpense.description.trim() || !quickExpense.amount}
-                    className={`rounded-xl px-5 ml-3 transition-all ${quickSuccess
-                      ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                      : 'gradient-primary text-white shadow-lg shadow-violet-500/20'
-                      }`}
-                  >
-                    {quickLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : quickSuccess ? '✓ Added!' : <><Send className="mr-1.5 h-3.5 w-3.5" /> Add</>}
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* ═══════════════ Activity Feed ═══════════════ */}
-        <motion.div custom={10} variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
-          <div className="glass-card rounded-2xl">
-            <div className="px-5 pt-5 pb-2">
-              <h3 className="text-base font-display font-semibold text-white flex items-center gap-2">
-                <Receipt className="h-4 w-4 text-indigo-400" />
-                Activity Feed
-              </h3>
-              <p className="text-xs text-gray-500">Recent actions across your groups</p>
-            </div>
-            <div className="px-3 pb-5">
-              <ActivityFeed />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* ═══════════════ Recent Expenses ═══════════════ */}
-        <motion.div custom={10} variants={fadeUp} initial="hidden" animate="visible">
-          <div className="glass-card rounded-2xl">
-            <div className="px-5 pt-5 pb-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-display font-semibold text-white flex items-center gap-2">
-                    <Receipt className="h-4 w-4 text-sky-400" />
-                    Recent Expenses
-                  </h3>
-                  <p className="text-xs text-gray-500">Your latest transactions</p>
-                </div>
-                <Link href="/dashboard/expenses">
-                  <Button variant="ghost" size="sm" className="text-xs text-gray-500 hover:text-gray-300 rounded-lg">
-                    View All <ChevronRight className="ml-1 h-3 w-3" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-            <div className="px-5 pb-5">
-              {stats?.recentExpenses && stats.recentExpenses.length > 0 ? (
-                <div className="space-y-1.5">
-                  {stats.recentExpenses.slice(0, 6).map((expense, idx) => (
-                    <motion.div
-                      key={expense.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.8 + idx * 0.05 }}
-                      className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] border border-transparent hover:border-white/[0.06] transition-all group"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0 transition-transform group-hover:scale-105"
-                          style={{ backgroundColor: `${getCategoryColor(expense.category)}12` }}
-                        >
-                          {getCategoryIcon(expense.category)}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-200 truncate">{expense.description}</p>
-                          <p className="text-xs text-gray-600">
-                            {getCategoryLabel(expense.category)} &middot; {formatIndianDate(expense.date)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end shrink-0 ml-3">
-                        <div className="flex items-center gap-3">
-                          <p className="text-sm font-bold text-gray-100">
-                            {formatIndianCurrency(parseFloat(expense.amount))}
-                          </p>
-                          <Link href={`/dashboard/expenses/${expense.id}/edit`}>
-                            <button
-                              title="Edit Expense"
-                              className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 hover:text-indigo-300 transition-colors opacity-0 group-hover:opacity-100"
-                            >
-                              <Edit className="h-3.5 w-3.5" />
-                            </button>
-                          </Link>
-                        </div>
-                        {expense.aiCategorized && (
-                          <p className="text-[10px] text-violet-400 flex items-center gap-0.5 mt-1">
-                            <Sparkles className="h-2.5 w-2.5" /> AI
-                          </p>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 text-gray-600">
-                  <p className="text-sm">No expenses yet</p>
-                  <Link href="/dashboard/expenses/new">
-                    <Button className="mt-3 rounded-xl" size="sm">
-                      Add Your First Expense
-                    </Button>
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

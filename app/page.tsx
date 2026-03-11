@@ -105,6 +105,27 @@ export default function LandingPage() {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
 
+  const [stats, setStats] = useState([
+    { value: 10000, suffix: '+', label: 'Active Users' },
+    { value: 50, suffix: 'L+', label: 'Expenses Tracked' },
+    { value: 25, suffix: '+', label: 'Categories' },
+    { value: 99, suffix: '%', label: 'AI Accuracy' },
+  ]);
+
+  useEffect(() => {
+    fetch('/api/stats/global')
+      .then(res => res.json())
+      .then(data => {
+        setStats([
+          { value: data.activeUsers, suffix: '+', label: 'Active Users' },
+          { value: Math.floor(data.totalExpensesTracked / 100000), suffix: 'L+', label: 'Expenses Tracked' },
+          { value: data.categories, suffix: '+', label: 'Categories' },
+          { value: data.aiAccuracy, suffix: '%', label: 'AI Accuracy' },
+        ]);
+      })
+      .catch(console.error);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#06070e] relative z-0">
       <AnimatedBackground />
@@ -303,12 +324,7 @@ export default function LandingPage() {
             className="glass-card rounded-3xl p-8 sm:p-12"
           >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              {[
-                { value: 10000, suffix: '+', label: 'Active Users' },
-                { value: 50, suffix: 'L+', label: 'Expenses Tracked' },
-                { value: 25, suffix: '+', label: 'Categories' },
-                { value: 99, suffix: '%', label: 'AI Accuracy' },
-              ].map((stat, i) => (
+              {stats.map((stat, i) => (
                 <motion.div
                   key={stat.label}
                   initial={{ opacity: 0, y: 16 }}

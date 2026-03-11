@@ -82,14 +82,14 @@ export default function DashboardNav() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    'relative flex flex-col items-center justify-center w-16 py-1.5 rounded-xl transition-all duration-300',
+                    'relative flex flex-col items-center justify-center w-16 h-full transition-all duration-300',
                     active ? 'text-violet-400' : 'text-gray-600'
                   )}
                 >
                   {active && (
                     <motion.span
                       layoutId="mobileTab"
-                      className="absolute -top-px left-1/2 -translate-x-1/2 w-8 h-[2px] rounded-full bg-gradient-to-r from-violet-400 to-indigo-400 shadow-[0_0_12px_rgba(124,58,237,0.5)]"
+                      className="absolute -top-[1px] inset-x-0 mx-auto w-10 h-[3px] rounded-b-full bg-gradient-to-r from-violet-500 to-indigo-500 dark:from-violet-400 dark:to-indigo-400 shadow-[0_2px_8px_rgba(139,92,246,0.5)]"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -101,7 +101,7 @@ export default function DashboardNav() {
                   </div>
                   <span className={cn(
                     'text-[10px] mt-0.5 font-medium',
-                    active ? 'text-violet-300' : 'text-gray-600'
+                    active ? 'text-violet-500 font-semibold dark:text-violet-300' : 'text-gray-500 dark:text-gray-500'
                   )}>
                     {item.name}
                   </span>
