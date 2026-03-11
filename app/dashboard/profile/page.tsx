@@ -4,6 +4,7 @@ import { UserProfile } from '@clerk/nextjs';
 import { formatIndianCurrency } from '@/lib/currency';
 import { Receipt, Users, Wallet, TrendingUp } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
+import MobileSignOutButton from '@/components/dashboard/MobileSignOutButton';
 
 async function getProfileStats(userId: string) {
   const [expenseCount, groupCount, totalSpentResult] = await Promise.all([
@@ -64,7 +65,10 @@ export default async function ProfilePage() {
             </h1>
             <p className="text-sm text-gray-500 mt-1">Your account and statistics</p>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-3">
+            <MobileSignOutButton />
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Stats */}

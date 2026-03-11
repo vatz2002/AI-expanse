@@ -309,7 +309,7 @@ export default function NewExpensePage() {
             </div>
 
             {/* Amount + Date row */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-medium text-gray-500 flex items-center gap-1.5">

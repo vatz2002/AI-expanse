@@ -592,7 +592,7 @@ export default function GroupDetailPage({ params }: { params: { id: string } }) 
 
         {/* ═══════════ KPI Strip ═══════════ */}
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }} className="mb-5">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-center">
               <p className="text-lg font-bold text-white">{formatCompactIndianCurrency(totalGroupSpending)}</p>
               <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">Total Spent</p>

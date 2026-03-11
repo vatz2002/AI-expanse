@@ -239,7 +239,7 @@ export default function GroupsPage() {
         </motion.div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
           {kpis.map((kpi, i) => (
             <motion.div key={kpi.label} custom={i} variants={fadeUp} initial="hidden" animate="visible">
               <div className="relative overflow-hidden glass-card rounded-xl p-3.5 group card-hover-glow transition-all">
