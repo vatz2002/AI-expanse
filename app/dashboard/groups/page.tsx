@@ -24,6 +24,7 @@ import {
 import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 /* ──────────── Types ──────────── */
 
@@ -374,7 +375,13 @@ export default function GroupsPage() {
                             }}
                           >
                             {member.imageUrl ? (
-                              <img src={member.imageUrl} alt="" className="w-full h-full object-cover" />
+                              <Image 
+                                src={member.imageUrl} 
+                                alt={member.name} 
+                                width={32} 
+                                height={32} 
+                                className="w-full h-full object-cover" 
+                              />
                             ) : (
                               <span className="text-white">{member.name.charAt(0).toUpperCase()}</span>
                             )}
