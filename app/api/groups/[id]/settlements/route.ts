@@ -95,6 +95,23 @@ export async function POST(
             },
         });
 
+        // Notify the receiver
+        const payerUser = await prisma.user.findUnique({ where: { id: data.fromUserId } });
+        const payerName = payerUser?.name || payerUser?.email || 'A member';
+        
+        try {
+            await prisma.notification.create({
+                data: {
+                    userId: data.toUserId,
+                    type: 'settlement',
+                    message: `${payerName} recorded a settlement of ₹${data.amount} in ${group?.name || 'Group'}`,
+                    link: `/dashboard/groups/${params.id}`,
+                }
+            });
+        } catch (notifyError) {
+            console.error('App notification creation failed:', notifyError);
+        }
+
         return NextResponse.json(settlement, { status: 201 });
     } catch (error) {
         if (error instanceof z.ZodError) {

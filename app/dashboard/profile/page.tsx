@@ -5,6 +5,7 @@ import { formatIndianCurrency } from '@/lib/currency';
 import { Receipt, Users, Wallet, TrendingUp } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import MobileSignOutButton from '@/components/dashboard/MobileSignOutButton';
+import GmailSyncSettings from '@/components/profile/GmailSyncSettings';
 
 async function getProfileStats(userId: string) {
   const [expenseCount, groupCount, totalSpentResult] = await Promise.all([
@@ -88,6 +89,9 @@ export default async function ProfilePage() {
             </div>
           ))}
         </div>
+
+        {/* Gmail Sync Settings */}
+        <GmailSyncSettings />
 
         {/* Clerk UserProfile */}
         <div className="glass-card rounded-2xl overflow-hidden w-full flex justify-center min-h-[500px]">

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { IndianRupee, LayoutDashboard, Receipt, Target, UserCircle, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { NotificationBell } from './NotificationBell';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -37,34 +38,37 @@ export default function DashboardNav() {
                 ExpenseAI
               </span>
             </Link>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center bg-white/[0.03] rounded-2xl p-1 border border-white/[0.04]">
-              {navigation.map((item) => {
-                const active = isActive(item.href);
-                return (
-                  <Link key={item.name} href={item.href}>
-                    <div
-                      className={cn(
-                        'relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300',
-                        active
-                          ? 'text-white'
-                          : 'text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]'
-                      )}
-                    >
-                      {active && (
-                        <motion.div
-                          layoutId="activeTab"
-                          className="absolute inset-0 bg-gradient-to-r from-violet-500/15 to-indigo-500/15 rounded-xl border border-violet-500/20"
-                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                        />
-                      )}
-                      <item.icon className={cn('h-4 w-4 relative z-10', active && 'text-violet-400')} />
-                      <span className="relative z-10">{item.name}</span>
-                    </div>
-                  </Link>
-                );
-              })}
+            {/* Right Side Navigation */}
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="hidden md:flex items-center bg-white/[0.03] rounded-2xl p-1 border border-white/[0.04] mr-2">
+                {navigation.map((item) => {
+                  const active = isActive(item.href);
+                  return (
+                    <Link key={item.name} href={item.href}>
+                      <div
+                        className={cn(
+                          'relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300',
+                          active
+                            ? 'text-white'
+                            : 'text-gray-500 hover:text-gray-300 hover:bg-white/[0.03]'
+                        )}
+                      >
+                        {active && (
+                          <motion.div
+                            layoutId="activeTab"
+                            className="absolute inset-0 bg-gradient-to-r from-violet-500/15 to-indigo-500/15 rounded-xl border border-violet-500/20"
+                            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                          />
+                        )}
+                        <item.icon className={cn('h-4 w-4 relative z-10', active && 'text-violet-400')} />
+                        <span className="relative z-10">{item.name}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+              
+              <NotificationBell />
             </div>
           </div>
         </div>

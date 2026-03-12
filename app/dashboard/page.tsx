@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import ActivityFeed from '@/components/dashboard/ActivityFeed';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import GmailSyncButton from '@/components/dashboard/GmailSyncButton';
 import { formatIndianCurrency, formatCompactIndianCurrency } from '@/lib/currency';
 import { formatIndianDate } from '@/lib/date';
 import { getCategoryLabel, getCategoryColor, getCategoryIcon } from '@/lib/categories';
@@ -227,6 +226,25 @@ export default function DashboardPage() {
     }
   };
 
+  useEffect(() => {
+    // Attempt background Gmail sync if enabled
+    const triggerAutoSync = async () => {
+      try {
+        await fetch('/api/sync/gmail', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isAuto: true }),
+        });
+      } catch (error) {
+        console.error('Background sync failed:', error);
+      }
+    };
+    
+    // Delay slightly to not block initial render
+    const timer = setTimeout(triggerAutoSync, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   if (loading) return <DashboardSkeleton />;
 
   /* ── Derived data ── */
@@ -332,7 +350,6 @@ export default function DashboardPage() {
             <p className="text-sm text-gray-500 mt-1">{formatIndianDate(new Date())}</p>
           </div>
           <div className="flex gap-3">
-            <GmailSyncButton />
             <Link href="/dashboard/expenses/new">
               <Button className="gradient-primary text-white shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 transition-all rounded-xl px-5 btn-glow">
                 <Plus className="mr-2 h-4 w-4" /> Add Expense

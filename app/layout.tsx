@@ -1,8 +1,9 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Toaster } from 'sonner';
 import './globals.css';
+import { PWAProvider } from '@/components/pwa/PWAProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -11,7 +12,6 @@ export const metadata: Metadata = {
   description: 'Track your expenses in INR with AI-powered categorization. Built for Indian users with smart budgets, group splitting, and beautiful analytics.',
   keywords: 'expense tracker, india, INR, money management, budget, AI, finance, pwa',
   manifest: '/manifest.json',
-  themeColor: '#06070e',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -24,6 +24,10 @@ export const metadata: Metadata = {
     icon: '/icon.svg',
     apple: '/icon.svg',
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#06070e',
 };
 
 export default function RootLayout({
@@ -60,7 +64,9 @@ export default function RootLayout({
         <body className={inter.className}>
           {/* Subtle noise overlay for texture */}
           <div className="noise-overlay" />
-          {children}
+          <PWAProvider>
+            {children}
+          </PWAProvider>
           <Toaster
             position="top-center"
             richColors

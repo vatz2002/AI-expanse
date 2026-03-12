@@ -102,6 +102,36 @@ export async function POST(
       },
     });
 
+    // Notify other group members
+    try {
+      const group = await prisma.group.findUnique({
+        where: { id: params.id },
+        include: {
+          members: {
+            select: { userId: true },
+          },
+        },
+      });
+
+      if (group) {
+        const senderName = message.user.name || message.user.email || 'A member';
+        const groupMembers = group.members.filter(m => m.userId !== user.id);
+        
+        if (groupMembers.length > 0) {
+          await prisma.notification.createMany({
+            data: groupMembers.map(m => ({
+              userId: m.userId,
+              type: 'group_message',
+              message: `${senderName} sent a message in ${group.name}: "${validatedData.message.substring(0, 50)}${validatedData.message.length > 50 ? '...' : ''}"`,
+              link: `/dashboard/groups/${params.id}`,
+            })),
+          });
+        }
+      }
+    } catch (notifyError) {
+      console.error('Failed to create message notifications:', notifyError);
+    }
+
     return NextResponse.json(message, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {

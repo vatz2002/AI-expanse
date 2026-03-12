@@ -200,6 +200,26 @@ export async function POST(
       }).catch(err => console.error('Failed to send notification:', err));
     }
 
+    // ── Auto-sync: Create app notifications for other members ──
+    const notificationsToCreate = groupMembers
+      .filter(m => m.userId !== validatedData.paidBy)
+      .map(m => ({
+        userId: m.userId,
+        type: 'group_expense',
+        message: `${paidByName} added an expense: ${validatedData.description} for ₹${validatedData.amount.toFixed(2)} in ${group.name}`,
+        link: `/dashboard/groups/${params.id}`,
+      }));
+
+    if (notificationsToCreate.length > 0) {
+      try {
+        await prisma.notification.createMany({
+          data: notificationsToCreate,
+        });
+      } catch (notifyError) {
+        console.error('App notification creation failed:', notifyError);
+      }
+    }
+
     return NextResponse.json(expense, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
